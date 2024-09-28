@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Resultados</title>
+</head>
+<body>
+    <h1>Resultados del Mineral</h1>
+    <h2>Nombre: {{ mineral.nombre }}</h2>
+    <img src="{{ mineral.imagen }}" alt="{{ mineral.nombre }}" style="width:300px;">
+    <h3>Características:</h3>
+    <ul>
+        <li>Descripción: {{ mineral.descripcion }}</li>
+        <li>Color: {{ mineral.color }}</li>
+        <li>Dureza: {{ mineral.dureza }}</li>
+        <!-- Agrega más características según tus datos -->
+    </ul>
+    <a href="/">Volver</a>
+</body>
+</html>
