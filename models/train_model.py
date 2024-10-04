@@ -1,7 +1,8 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, LeakyReLU
 from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.optimizers import Adam
 
 # Ruta local de Google Drive sincronizado en tu sistema (esto deberia ser con links)
 LOCAL_DRIVE_PATH = r'G:\Mi unidad\IA-imagenes'  # Ruta local de tu Google Drive
@@ -27,22 +28,27 @@ def entrenar_modelo():
         subset='validation'
     )
 
-    # Crear el modelo CNN
+    # Crear el modelo CNN con Leaky ReLU y más filtros
     model = Sequential([
-        Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+        Conv2D(64, (3, 3), input_shape=(150, 150, 3)),  # Aumenta a 64 filtros
+        LeakyReLU(alpha=0.1),
         MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(64, (3, 3), activation='relu'),
+        Conv2D(128, (3, 3)),  # Aumenta a 128 filtros
+        LeakyReLU(alpha=0.1),
         MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(128, (3, 3), activation='relu'),
+        Conv2D(256, (3, 3)),  # Aumenta a 256 filtros
+        LeakyReLU(alpha=0.1),
         MaxPooling2D(pool_size=(2, 2)),
         Flatten(),
-        Dense(512, activation='relu'),
+        Dense(512),  # Capa densa con 512 neuronas
+        LeakyReLU(alpha=0.1),
         Dropout(0.5),
         Dense(len(train_generator.class_indices), activation='softmax')  # Número de clases
     ])
 
-    # Compilar el modelo
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    # Compilar el modelo con un optimizador Adam y un learning rate ajustado
+    optimizer = Adam(learning_rate=0.0001)
+    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Guardar el mejor modelo
     checkpoint = ModelCheckpoint('best_model.keras', monitor='val_accuracy', save_best_only=True, mode='max')
@@ -53,3 +59,4 @@ def entrenar_modelo():
 
 if __name__ == '__main__':
     entrenar_modelo()
+
