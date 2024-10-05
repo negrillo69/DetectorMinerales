@@ -1,20 +1,29 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, LeakyReLU
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, Input
 from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.optimizers import Adam
 
-# Ruta local de Google Drive sincronizado en tu sistema (esto deberia ser con links)
-LOCAL_DRIVE_PATH = r'G:\Mi unidad\IA-imagenes'  # Ruta local de tu Google Drive
+# Ruta local de Google Drive sincronizado en tu sistema
+LOCAL_DRIVE_PATH = r'G:\Mi unidad\IA-imagenes'
 
 def entrenar_modelo():
-    # Generador de imágenes desde directorios, con un 20% para validación
-    datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
+    # Generador de imágenes desde directorios con aumento de datos
+    datagen = ImageDataGenerator(
+        rescale=1./255,
+        validation_split=0.2,  # Dividir en 80% entrenamiento y 20% validación
+        rotation_range=40,      # Rango de rotación para aumentar datos
+        width_shift_range=0.2,  # Desplazamiento horizontal
+        height_shift_range=0.2, # Desplazamiento vertical
+        shear_range=0.2,        # Aplicar corte en el eje
+        zoom_range=0.2,         # Aumento con zoom
+        horizontal_flip=True,   # Voltear imágenes horizontalmente
+        fill_mode='nearest'     # Llenar píxeles vacíos
+    )
 
     # Carga de imágenes directamente desde las carpetas locales en Google Drive
     train_generator = datagen.flow_from_directory(
         directory=LOCAL_DRIVE_PATH,
-        target_size=(150, 150),   # Cambia el tamaño de las imágenes si es necesario
+        target_size=(150, 150),   
         batch_size=32,
         class_mode='categorical',
         subset='training'
@@ -28,35 +37,40 @@ def entrenar_modelo():
         subset='validation'
     )
 
-    # Crear el modelo CNN con Leaky ReLU y más filtros
+    # Crear el modelo CNN
     model = Sequential([
-        Conv2D(64, (3, 3), input_shape=(150, 150, 3)),  # Aumenta a 64 filtros
-        LeakyReLU(alpha=0.1),
+        Input(shape=(150, 150, 3)),  # Usar Input como primera capa
+        Conv2D(32, (3, 3), activation='relu'),
         MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(128, (3, 3)),  # Aumenta a 128 filtros
-        LeakyReLU(alpha=0.1),
+        Dropout(0.25),  # Dropout para reducir sobreajuste
+
+        Conv2D(64, (3, 3), activation='relu'),
         MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(256, (3, 3)),  # Aumenta a 256 filtros
-        LeakyReLU(alpha=0.1),
+        Dropout(0.25),  # Dropout adicional
+
+        Conv2D(128, (3, 3), activation='relu'),
         MaxPooling2D(pool_size=(2, 2)),
+        Dropout(0.25),
+
+        Conv2D(256, (3, 3), activation='relu'),
+        MaxPooling2D(pool_size=(2, 2)),
+        Dropout(0.25),
+
         Flatten(),
-        Dense(512),  # Capa densa con 512 neuronas
-        LeakyReLU(alpha=0.1),
-        Dropout(0.5),
+        Dense(512, activation='relu'),  # Mantener ReLU aquí
+        Dropout(0.5),  # Dropout más fuerte en la capa completamente conectada
         Dense(len(train_generator.class_indices), activation='softmax')  # Número de clases
     ])
 
-    # Compilar el modelo con un optimizador Adam y un learning rate ajustado
-    optimizer = Adam(learning_rate=0.0001)
-    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    # Compilar el modelo
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Guardar el mejor modelo
     checkpoint = ModelCheckpoint('best_model.keras', monitor='val_accuracy', save_best_only=True, mode='max')
 
     # Entrenar el modelo
-    model.fit(train_generator, validation_data=validation_generator, epochs=10, callbacks=[checkpoint])
+    model.fit(train_generator, validation_data=validation_generator, epochs=30, callbacks=[checkpoint])  # Aumentar el número de épocas
     print("Entrenamiento completo. Modelo guardado.")
 
 if __name__ == '__main__':
     entrenar_modelo()
-
