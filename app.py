@@ -8,7 +8,7 @@ app = Flask(__name__)
 # Conexión a MongoDB
 client = MongoClient('mongodb://localhost:27017/')
 db = client['Minerales']  # Cambia esto por el nombre de tu base de datos
-minerals_collection = db['Coleccion1']  # Nombre de la colección de minerales
+minerals_collection = db['Coleccion1']  # Nombre de la colección de mineralessssss
 
 @app.route('/')
 def index():
