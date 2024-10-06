@@ -13,10 +13,14 @@
     <h3>Características:</h3>
     <ul>
         <li>Descripción: {{ mineral.descripcion }}</li>
-        <li>Color: {{ mineral.color }}</li>
-        <li>Dureza: {{ mineral.dureza }}</li>
-        <!-- Agrega más características según tus datos -->
+        <li>Color: {{ mineral.caracteristicas.color }}</li>
+        <li>Densidad: {{ mineral.caracteristicas.densidad }}</li>
+        <li>Numero atomico: {{ mineral.caracteristicas.numero_atomico }}</li>
+        <li>Habito: {{ mineral.caracteristicas.habito }}</li>
+        <li>Estructura cristalina: {{ mineral.caracteristicas.estructura_cristalina }}</li>
+        <li>Simbolo quimico: {{ mineral.caracteristicas.simbolo_quimico }}</li>
     </ul>
     <a href="/">Volver</a>
 </body>
 </html>
+

@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 # Conexión a MongoDB
 client = MongoClient('mongodb://localhost:27017/')
-db = client['minerales_db']  # Cambia esto por el nombre de tu base de datos
+db = client['Minerales']  # Cambia esto por el nombre de tu base de datos
+minerals_collection = db['Coleccion1']  # Nombre de la colección de minerales
 
 @app.route('/')
 def index():
@@ -26,8 +27,12 @@ def upload():
     # Aquí puedes realizar validaciones adicionales si es necesario
 
     # Obtener un mineral aleatorio de la base de datos
-    minerals = list(db.minerales.find())  # Asegúrate de que existe esta colección
+    minerals = list(minerals_collection.find())  # Asegúrate de que existe esta colección
+    if not minerals:
+        return 'No hay minerales en la base de datos', 404
+
     random_mineral = random.choice(minerals)
+    
 
     return render_template('results.html', mineral=random_mineral)
 
